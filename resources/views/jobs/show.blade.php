@@ -1,133 +1,51 @@
 @extends('layouts.app')
 
-@section('title', $job->title . ' at ' . $job->company . ' | JobPortal')
-
-@section('styles')
-<style>
-    .job-detail-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        padding: 2.5rem;
-        margin-bottom: 2rem;
-    }
-
-    .job-header-flex {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-start;
-        margin-bottom: 2rem;
-        flex-wrap: wrap;
-        gap: 1.5rem;
-    }
-
-    .detail-grid {
-        display: grid;
-        grid-template-columns: repeat(4, 1fr);
-        gap: 1rem;
-        background: var(--bg-subtle);
-        border: 1px solid var(--border-color);
-        padding: 1.25rem;
-        margin-bottom: 2rem;
-    }
-
-    .detail-box {
-        text-align: center;
-    }
-
-    .detail-label {
-        font-size: 0.78rem;
-        color: var(--text-sub);
-        text-transform: uppercase;
-        margin-bottom: 0.25rem;
-    }
-
-    .detail-val {
-        font-weight: 700;
-        font-size: 0.95rem;
-        color: var(--text-main);
-    }
-
-    /* Application Modal Overlay */
-    .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background: rgba(15, 23, 42, 0.35);
-        z-index: 2000;
-        display: none;
-        align-items: center;
-        justify-content: center;
-        padding: 1.5rem;
-    }
-
-    .modal-card {
-        background: var(--bg-card);
-        border: 1px solid var(--border-color);
-        max-width: 600px;
-        width: 100%;
-        padding: 2rem;
-        position: relative;
-    }
-
-    .close-modal {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        background: none;
-        border: none;
-        color: var(--text-muted);
-        font-size: 1.25rem;
-        cursor: pointer;
-    }
-
-    @media (max-width: 768px) {
-        .detail-grid {
-            grid-template-columns: repeat(2, 1fr);
-        }
-    }
-</style>
-@endsection
+@section('title', $job->title . ' at ' . $job->company . ' | ' . $portalSettings->site_name)
 
 @section('content')
 
 <div style="margin-bottom: 1.5rem;">
-    <a href="{{ route('jobs.index') }}" style="color: var(--text-muted); font-size: 0.9rem;">
-        <i class="fas fa-arrow-left me-1"></i> Back to Job Listings
+    <a href="{{ route('jobs.index') }}" class="btn btn-outline btn-sm" style="display: inline-flex;">
+        <i class="fas fa-arrow-left"></i> Back to Job Listings
     </a>
 </div>
 
-<div class="job-detail-card">
-    <div class="job-header-flex">
-        <div style="display: flex; gap: 1.25rem; align-items: center;">
-            <div style="width: 64px; height: 64px; background: var(--bg-subtle); border: 1px solid var(--border-color); display: flex; align-items: center; justify-content: center; color: var(--primary-light); font-size: 1.75rem;">
+<article class="job-detail-card">
+    <div class="job-header" style="align-items: center; margin-bottom: 24px;">
+        <div style="display: flex; gap: 18px; align-items: center;">
+            <div class="company-logo-placeholder" style="width: 58px; height: 58px; font-size: 1.5rem;">
                 <i class="fas fa-building"></i>
             </div>
             <div>
-                <h1 style="font-size: 2rem; font-weight: 800; color: var(--text-main);">{{ $job->title }}</h1>
-                <p style="color: var(--text-muted); font-size: 1rem; margin-top: 0.25rem;">
-                    <strong style="color: var(--text-main);">{{ $job->company }}</strong> • <i class="fas fa-map-marker-alt" style="color: var(--primary-light);"></i> {{ $job->location }}
+                <h1 style="font-size: 1.75rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">{{ $job->title }}</h1>
+                <p style="color: var(--text-muted); font-size: 0.95rem; margin: 0; display: flex; flex-wrap: wrap; align-items: center; gap: 8px;">
+                    <strong style="color: var(--text-main);">{{ $job->company }}</strong>
+                    <span style="color: var(--border-color);">&bull;</span>
+                    <span><i class="fas fa-map-marker-alt me-1" style="color: var(--primary);"></i> {{ $job->location }}</span>
+                    @if($job->category)
+                    <span style="color: var(--border-color);">&bull;</span>
+                    <span style="color: var(--text-sub);">{{ $job->category->name }}</span>
+                    @endif
                 </p>
             </div>
         </div>
 
-        <div>
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
             @auth
                 @if(Auth::user()->isEmployer() || Auth::user()->isAdmin())
                     @if(Auth::id() === $job->employer_id || Auth::user()->isAdmin())
-                    <a href="{{ route('jobs.edit', $job->id) }}" class="btn btn-outline me-2"><i class="fas fa-edit"></i> Edit Listing</a>
+                    <a href="{{ route('jobs.edit', $job->id) }}" class="btn btn-outline"><i class="fas fa-edit"></i> Edit Listing</a>
                     <form action="{{ route('jobs.destroy', $job->id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Delete this job listing?')">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-outline" style="color: var(--danger); border-color: var(--border-color);"><i class="fas fa-trash"></i> Delete</button>
+                        <button type="submit" class="btn btn-danger-outline"><i class="fas fa-trash"></i> Delete</button>
                     </form>
                     @endif
                 @else
                     @if($hasApplied)
-                    <button class="btn btn-accent" disabled style="opacity: 0.85;">
+                    <span class="role-badge applied-label" style="padding: 8px 14px; font-size: 0.85rem;">
                         <i class="fas fa-check-circle me-1"></i> Application Submitted
-                    </button>
+                    </span>
                     @elseif($job->status !== 'Open' || !$applicationsOpen)
                     <button class="btn btn-outline" disabled>{{ $job->status !== 'Open' ? 'Applications closed' : 'Applications paused' }}</button>
                     @else
@@ -138,88 +56,101 @@
                 @endif
             @else
                 <a href="{{ route('login') }}" class="btn btn-primary">
-                    <i class="fas fa-sign-in-alt me-1"></i> Login to Apply
+                    <i class="fas fa-sign-in-alt me-1"></i> Sign In to Apply
                 </a>
             @endauth
         </div>
     </div>
 
-    <!-- Metadata Grid -->
+    <!-- Clean Metadata Bar -->
     <div class="detail-grid">
         <div class="detail-box">
-            <div class="detail-label">JOB TYPE</div>
-            <div class="detail-val" style="color: var(--primary-light);">{{ $job->type }}</div>
+            <div class="detail-label">Job Type</div>
+            <div class="detail-val" style="color: var(--primary);">{{ $job->type }}</div>
         </div>
         <div class="detail-box">
-            <div class="detail-label">EXPERIENCE</div>
+            <div class="detail-label">Experience</div>
             <div class="detail-val">{{ $job->experience_level }}</div>
         </div>
         <div class="detail-box">
-            <div class="detail-label">SALARY RANGE</div>
-            <div class="detail-val" style="color: var(--accent);">{{ $job->salary_range ?? 'Competitive' }}</div>
+            <div class="detail-label">Salary Range</div>
+            <div class="detail-val">{{ $job->salary_range ?? 'Competitive' }}</div>
         </div>
         <div class="detail-box">
-            <div class="detail-label">POSTED DATE</div>
+            <div class="detail-label">Posted Date</div>
             <div class="detail-val">{{ $job->created_at->format('M d, Y') }}</div>
         </div>
     </div>
 
-    <!-- Description & Requirements -->
-    <div style="margin-bottom: 2.5rem;">
-        <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--text-main);">Job Description</h3>
-        <p style="color: var(--text-muted); font-size: 1rem; line-height: 1.7; white-space: pre-line;">{{ $job->description }}</p>
+    <!-- Description -->
+    <div style="margin-bottom: 2rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">Job Overview</h2>
+        <div style="color: var(--text-muted); font-size: 0.95rem; line-height: 1.7; white-space: pre-line;">{{ $job->description }}</div>
     </div>
 
+    <!-- Requirements -->
     @if($job->requirements)
-    <div style="margin-bottom: 2rem;">
-        <h3 style="font-size: 1.3rem; margin-bottom: 1rem; color: var(--text-main);">Candidate Requirements</h3>
-        <div style="background: var(--bg-subtle); border: 1px solid var(--border-color); padding: 1.5rem; color: var(--text-muted); font-size: 0.95rem; line-height: 1.8; white-space: pre-line;">
-            {{ $job->requirements }}
-        </div>
+    <div style="margin-bottom: 1.5rem;">
+        <h2 style="font-size: 1.25rem; font-weight: 700; margin-bottom: 0.75rem; color: var(--text-main);">Candidate Requirements</h2>
+        <div style="background: var(--bg-subtle); border: 1px solid var(--border-color); border-radius: var(--radius); padding: 1.25rem 1.5rem; color: var(--text-muted); font-size: 0.92rem; line-height: 1.75; white-space: pre-line;">{{ $job->requirements }}</div>
     </div>
     @endif
-</div>
+</article>
 
 <!-- Related Jobs -->
 @if(!$relatedJobs->isEmpty())
-<div style="margin-top: 3rem;">
-    <h3 style="font-size: 1.4rem; margin-bottom: 1.25rem; color: var(--text-main);">Similar Jobs You Might Like</h3>
-    <div class="related-grid" style="gap: 1.5rem;">
+<section style="margin-top: 2.5rem;" aria-label="Similar Jobs">
+    <h2 style="font-size: 1.3rem; margin-bottom: 1.25rem; color: var(--text-main);">Similar Jobs You Might Like</h2>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">
         @foreach($relatedJobs as $rJob)
-        <div style="background: var(--bg-card); border: 1px solid var(--border-color); padding: 1.25rem;">
-            <h4 style="font-size: 1.1rem; color: var(--text-main);"><a href="{{ route('jobs.show', $rJob->id) }}">{{ $rJob->title }}</a></h4>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-top: 0.25rem;">{{ $rJob->company }} • {{ $rJob->location }}</p>
-        </div>
+        <article class="job-card" style="margin-bottom: 0;">
+            <h3 style="font-size: 1.05rem; font-weight: 700; color: var(--text-main); margin-bottom: 4px;">
+                <a href="{{ route('jobs.show', $rJob->id) }}">{{ $rJob->title }}</a>
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin: 0;">{{ $rJob->company }} &bull; {{ $rJob->location }}</p>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border-color);">
+                <span class="job-type-badge">{{ $rJob->type }}</span>
+                <a href="{{ route('jobs.show', $rJob->id) }}" class="btn btn-outline btn-sm">View Details</a>
+            </div>
+        </article>
         @endforeach
     </div>
-</div>
+</section>
 @endif
 
 <!-- Application Modal -->
-<div class="modal-overlay" id="applyModal">
+<div class="modal-overlay" id="applyModal" onclick="if(event.target === this) this.style.display='none'">
     <div class="modal-card">
-        <button class="close-modal" onclick="document.getElementById('applyModal').style.display='none'">&times;</button>
-        
-        <h3 style="font-size: 1.5rem; font-weight: 700; margin-bottom: 0.25rem; color: var(--text-main);">Submit Job Application</h3>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 1.5rem;">Position: {{ $job->title }} at {{ $job->company }}</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+            <div>
+                <h2 style="font-size: 1.3rem; font-weight: 700; margin: 0;">Submit Application</h2>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-top: 2px;">{{ $job->title }} at {{ $job->company }}</p>
+            </div>
+            <button type="button" class="btn btn-outline btn-sm" onclick="document.getElementById('applyModal').style.display='none'" aria-label="Close dialog">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
 
         <form action="{{ route('applications.apply', $job->id) }}" method="POST">
             @csrf
 
             <div class="form-group">
-                <label class="form-label" for="cover_letter">Cover Letter / Pitch *</label>
-                <textarea id="cover_letter" name="cover_letter" rows="5" class="form-control" required placeholder="Explain why you are the ideal candidate for this role..."></textarea>
+                <label class="form-label" for="cover_letter">Cover Letter / Note *</label>
+                <textarea id="cover_letter" name="cover_letter" rows="5" class="form-control" required placeholder="Explain why you are a great match for this position..."></textarea>
             </div>
 
             <div class="form-group">
                 <label class="form-label" for="resume_url">Resume / Portfolio Link</label>
                 <input type="url" id="resume_url" name="resume_url" class="form-control" value="{{ Auth::user()->resume_link ?? '' }}" placeholder="https://github.com/username or LinkedIn link">
-                <span style="font-size: 0.78rem; color: var(--text-sub); display: block; margin-top: 0.25rem;">Provide a public GitHub, LinkedIn, or Google Drive URL.</span>
+                <p class="field-help">Provide a link to your CV, portfolio, or LinkedIn profile.</p>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 1rem;">
-                <i class="fas fa-paper-plane me-1"></i> Confirm & Submit Application
-            </button>
+            <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button type="button" class="btn btn-outline" onclick="document.getElementById('applyModal').style.display='none'">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-paper-plane me-1"></i> Submit Application
+                </button>
+            </div>
         </form>
     </div>
 </div>

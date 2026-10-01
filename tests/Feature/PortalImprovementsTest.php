@@ -6,6 +6,7 @@ use App\Models\Application;
 use App\Models\Category;
 use App\Models\JobListing;
 use App\Models\Notification;
+use App\Models\PortalSetting;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -13,6 +14,32 @@ use Tests\TestCase;
 class PortalImprovementsTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_portal_settings_are_available_in_page_titles_and_layouts(): void
+    {
+        $settings = PortalSetting::current();
+        $settings->site_name = 'Punjab Careers';
+        $settings->save();
+
+        $owner = User::factory()->create(['role' => 'employer']);
+        $job = $this->createJob($owner);
+
+        foreach (['/', '/jobs', '/jobs/'.$job->id, '/login', '/register'] as $url) {
+            $this->get($url)->assertOk()->assertSee('Punjab Careers');
+        }
+
+        $this->actingAs($owner)->get('/jobs-create')->assertOk()->assertSee('Punjab Careers');
+
+        $candidate = User::factory()->create(['role' => 'job_seeker']);
+        foreach (['/dashboard', '/profile', '/profile/edit'] as $url) {
+            $this->actingAs($candidate)->get($url)->assertOk()->assertSee('Punjab Careers');
+        }
+    }
+
+    public function test_job_listing_uses_default_portal_settings_when_none_are_saved(): void
+    {
+        $this->get('/jobs')->assertOk()->assertSee('Browse Job Listings | JobPortal');
+    }
 
     private function createJob(User $owner, array $attributes = []): JobListing
     {

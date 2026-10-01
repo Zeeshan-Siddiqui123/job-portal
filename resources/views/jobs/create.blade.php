@@ -1,12 +1,15 @@
 @extends('layouts.app')
 
-@section('title', 'Post a New Job | JobPortal')
+@section('title', 'Post a New Job | ' . $portalSettings->site_name)
 
 @section('content')
-<div class="form-shell ">
+<div class="form-shell">
     <div class="form-panel">
-        <h1 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 0.25rem;">Post a New Job Listing</h1>
-        <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 2rem;">Reach thousands of qualified job seekers across Pakistan and remotely.</p>
+        <div style="margin-bottom: 24px;">
+            <p class="eyebrow" style="margin-bottom: 4px;">Recruitment Portal</p>
+            <h1 style="font-size: 1.6rem; font-weight: 700; margin-bottom: 6px;">Post a New Job Listing</h1>
+            <p>Publish an open opportunity to reach qualified candidates.</p>
+        </div>
 
         <form action="{{ route('jobs.store') }}" method="POST">
             @csrf
@@ -16,7 +19,7 @@
                 <input type="text" id="title" name="title" class="form-control" value="{{ old('title') }}" required placeholder="e.g. Senior Backend Engineer (Laravel)">
             </div>
 
-            <div class="form-grid" style="gap: 1rem;">
+            <div class="form-grid">
                 <div class="form-group">
                     <label class="form-label" for="category_id">Category *</label>
                     <x-custom-dropdown>
@@ -33,7 +36,7 @@
                 </div>
             </div>
 
-            <div class="form-grid form-grid--three" style="gap: 1rem;">
+            <div class="form-grid form-grid--three">
                 <div class="form-group">
                     <label class="form-label" for="location">Location *</label>
                     <input type="text" id="location" name="location" class="form-control" value="{{ old('location', 'Lahore, Pakistan') }}" required placeholder="e.g. Lahore, Karachi, Remote">
@@ -75,14 +78,17 @@
                 <textarea id="requirements" name="requirements" rows="4" class="form-control" placeholder="List required experience, technical tools, and qualifications..."></textarea>
             </div>
 
-            <div class="form-group" style="display: flex; align-items: center; gap: 0.5rem;">
+            <div class="form-group" style="display: flex; align-items: center; gap: 8px;">
                 <input type="checkbox" name="featured" id="featured" value="1">
-                <label for="featured" style="cursor: pointer; font-size: 0.9rem;">Mark as Featured Job Listing</label>
+                <label for="featured" style="cursor: pointer; font-size: 0.9rem; color: var(--text-main); font-weight: 500;">Mark as Featured Job Listing</label>
             </div>
 
-            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 1rem;">
-                <i class="fas fa-paper-plane me-1"></i> Publish Job Listing
-            </button>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <a href="{{ route('dashboard') }}" class="btn btn-outline">Cancel</a>
+                <button type="submit" class="btn btn-primary" style="flex: 1;">
+                    <i class="fas fa-paper-plane me-1"></i> Publish Job Listing
+                </button>
+            </div>
         </form>
     </div>
 </div>
