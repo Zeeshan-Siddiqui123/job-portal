@@ -184,22 +184,22 @@
             <main id="main-content" tabindex="-1">
                 <div class="container">
                     @if(session('success'))
-                    <div class="flash-alert flash-success" role="status">
-                        <i class="fas fa-check-circle fa-lg" style="margin-top: 2px;"></i>
+                    <div class="flash-alert flash-success" role="status" data-success-alert>
+                        <i class="fas fa-check-circle fa-lg" aria-hidden="true"></i>
                         <div>{{ session('success') }}</div>
                     </div>
                     @endif
 
                     @if(session('error'))
                     <div class="flash-alert flash-error" role="alert">
-                        <i class="fas fa-exclamation-triangle fa-lg" style="margin-top: 2px;"></i>
+                        <i class="fas fa-exclamation-triangle fa-lg" aria-hidden="true"></i>
                         <div>{{ session('error') }}</div>
                     </div>
                     @endif
 
                     @if($errors->any())
                     <div class="flash-alert flash-error" role="alert">
-                        <i class="fas fa-exclamation-circle fa-lg" style="margin-top: 2px;"></i>
+                        <i class="fas fa-exclamation-circle fa-lg" aria-hidden="true"></i>
                         <ul style="padding-left: 1.25rem; margin: 0;">
                             @foreach($errors->all() as $error)<li>{{ $error }}</li>@endforeach
                         </ul>
